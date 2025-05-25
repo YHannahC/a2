@@ -37,22 +37,45 @@ function getCarByVin($vin) {
  * @return bool update success or fail
  */
 function updateCarAvailability($vin, $availability) {
-    $cars = getCars();
-    $updated = false;
+    // Use file locking to prevent race conditions
+    $lockFile = CARS_JSON_FILE . '.lock';
+    $lockHandle = fopen($lockFile, 'w');
     
-    for($i = 0; $i < count($cars); $i++) {
-        if($cars[$i]['vin'] === $vin) {
-            $cars[$i]['availability'] = $availability;
-            $updated = true;
-            break;
+    if (!$lockHandle || !flock($lockHandle, LOCK_EX)) {
+        if ($lockHandle) fclose($lockHandle);
+        return false;
+    }
+    
+    try {
+        // Re-read the file to get the latest data
+        $cars = getCars();
+        $updated = false;
+        
+        for($i = 0; $i < count($cars); $i++) {
+            if($cars[$i]['vin'] === $vin) {
+                // Double-check availability before updating
+                if (!$availability || $cars[$i]['availability']) {
+                    $cars[$i]['availability'] = $availability;
+                    $updated = true;
+                } else {
+                    // Car is already unavailable
+                    $updated = false;
+                }
+                break;
+            }
         }
+        
+        if($updated) {
+            $result = file_put_contents(CARS_JSON_FILE, json_encode($cars, JSON_PRETTY_PRINT));
+            return $result !== false;
+        }
+        
+        return false;
+    } finally {
+        flock($lockHandle, LOCK_UN);
+        fclose($lockHandle);
+        @unlink($lockFile);
     }
-    
-    if($updated) {
-        return file_put_contents(CARS_JSON_FILE, json_encode($cars, JSON_PRETTY_PRINT));
-    }
-    
-    return false;
 }
 
 /**
@@ -175,7 +198,6 @@ function getSearchSuggestions($query) {
     $cars = getCars();
     $suggestions = [];
     
-    // collect all types, brands and models
     $types = [];
     $brands = [];
     $models = [];
@@ -185,6 +207,7 @@ function getSearchSuggestions($query) {
         $types[$car['type']] = true;
         $brands[$car['brand']] = true;
         $models[$car['model']] = true;
+        
         $words = explode(' ', strtolower($car['description']));
         foreach($words as $word) {
             $word = trim($word, '.,!?;:');
@@ -194,21 +217,18 @@ function getSearchSuggestions($query) {
         }
     }
     
-    // first add matching types (with label)
     foreach(array_keys($types) as $type) {
         if(stripos($type, $query) !== false) {
             $suggestions[] = $type . ' (Type)';
         }
     }
     
-    // then add matching brands
     foreach(array_keys($brands) as $brand) {
         if(stripos($brand, $query) !== false) {
             $suggestions[] = $brand;
         }
     }
     
-    // finally add matching models
     foreach(array_keys($models) as $model) {
         if(stripos($model, $query) !== false) {
             $suggestions[] = $model;
@@ -292,4 +312,4 @@ function filterCarsByMultiple($cars, $types = [], $brands = []) {
 
         return $typeMatch && $brandMatch;
     });
-} 
+}
