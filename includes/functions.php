@@ -179,11 +179,19 @@ function getSearchSuggestions($query) {
     $types = [];
     $brands = [];
     $models = [];
+    $descriptionWords = [];
     
     foreach($cars as $car) {
         $types[$car['type']] = true;
         $brands[$car['brand']] = true;
         $models[$car['model']] = true;
+        $words = explode(' ', strtolower($car['description']));
+        foreach($words as $word) {
+            $word = trim($word, '.,!?;:');
+            if(strlen($word) > 3 && stripos($word, $query) !== false) {
+                $descriptionWords[$word] = true;
+            }
+        }
     }
     
     // first add matching types (with label)
@@ -207,7 +215,12 @@ function getSearchSuggestions($query) {
         }
     }
     
-    return array_unique($suggestions);
+    foreach(array_keys($descriptionWords) as $word) {
+        $suggestions[] = ucfirst($word);
+    }
+    
+    return array_slice(array_unique($suggestions), 0, 8);
+}
 }
 
 /**
