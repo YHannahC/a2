@@ -88,6 +88,7 @@ function displaySelectedCar(car) {
         <h2 class="selected-car-title">Selected Car</h2>
         <img src="${car.image_url}" alt="${car.brand} ${car.model}" class="selected-car-image">
         <h3 class="selected-car-name">${car.brand} ${car.model}</h3>
+        <p class="selected-car-description">${car.description}</p>
         <div class="selected-car-info">
             <div class="selected-car-info-item">Type: <span>${car.type}</span></div>
             <div class="selected-car-info-item">Year: <span>${car.year}</span></div>
