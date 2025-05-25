@@ -1,4 +1,4 @@
-/* 全局样式 */
+/* Global Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -24,7 +24,7 @@ a {
     color: inherit;
 }
 
-/* head */
+/* Header */
 header {
     background-color: #111;
     box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
@@ -76,7 +76,7 @@ header {
     margin-right: 5px;
 }
 
-/* main */
+/* Main Content */
 .main-content {
     padding: 30px 0;
     min-height: calc(100vh - 130px);
@@ -89,7 +89,7 @@ header {
     color: #fff;
 }
 
-/* search */
+/* Search Area */
 .search-container {
     position: relative;
     margin-bottom: 30px;
@@ -163,7 +163,7 @@ header {
     color: #aaa;
 }
 
-/* 筛选器样式 */
+/* Filter Styles */
 .content-layout {
     display: flex;
     gap: 30px;
@@ -241,7 +241,7 @@ header {
     background-color: #555;
 }
 
-/* 汽车网格样式 */
+/* Car Grid Styles */
 .cars-grid-container {
     flex-grow: 1;
 }
@@ -312,6 +312,7 @@ header {
     margin-bottom: 10px;
     color: #000;
 }
+
 .car-description {
     font-size: 0.9rem;
     color: #666;
@@ -320,6 +321,7 @@ header {
     padding: 8px 0;
     border-bottom: 1px solid #eee;
 }
+
 .car-info {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -368,7 +370,7 @@ header {
     cursor: not-allowed;
 }
 
-/* 预订页样式 */
+/* Reservation Page Styles */
 .reservation-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -442,7 +444,7 @@ header {
     color: #fff;
 }
 
-/* 表单样式 */
+/* Form Styles */
 .form-group {
     margin-bottom: 20px;
 }
@@ -460,12 +462,13 @@ header {
     border: 1px solid #333;
     border-radius: 4px;
     font-size: 1rem;
-    background-color: #222;
-    color: #fff;
+    background-color: #fff;
+    color: #000;
 }
 
 .form-input.error {
     border-color: #f44336;
+    border-width: 2px;
 }
 
 .form-error-message {
@@ -538,7 +541,7 @@ header {
     background-color: #444;
 }
 
-/* 订单确认样式 */
+/* Order Confirmation Styles */
 .order-confirmation {
     background-color: #111;
     border-radius: 8px;
@@ -675,7 +678,7 @@ header {
     background-color: #222;
 }
 
-/* notif */
+/* Notification Styles */
 .notification {
     position: fixed;
     top: 20px;
