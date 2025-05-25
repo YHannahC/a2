@@ -221,7 +221,6 @@ function getSearchSuggestions($query) {
     
     return array_slice(array_unique($suggestions), 0, 8);
 }
-}
 
 /**
  * filter cars by type and brand
