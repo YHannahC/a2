@@ -153,6 +153,7 @@ function displayCars(cars) {
             </div>
             <div class="car-details">
                 <h3 class="car-name">${car.brand} ${car.model}</h3>
+                <p class="car-description">${car.description}</p>
                 <div class="car-info">
                     <div class="car-info-item">Type: <span>${car.type}</span></div>
                     <div class="car-info-item">Year: <span>${car.year}</span></div>
