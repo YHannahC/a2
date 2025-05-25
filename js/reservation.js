@@ -55,10 +55,10 @@ function loadCarDetails(vin) {
                     const vinInput = document.getElementById('car-vin');
                     if (vinInput) vinInput.value = car.vin;
                     
-                    // show reservation form
+                    // show reserva form
                     if (reservationFormContainer) reservationFormContainer.style.display = 'block';
                 } else {
-                    // car is no longer available
+                    // car is no available
                     displaySelectedCar(car);
                     showCarUnavailableMessage();
                 }
@@ -98,11 +98,11 @@ function displaySelectedCar(car) {
         <div class="selected-car-price">$${car.price_per_day}/day</div>
     `;
     
-    // Save price for calculating total price
+    // Save total price
     const reservationForm = document.getElementById('reservation-form');
     if (reservationForm) {
         reservationForm.dataset.pricePerDay = car.price_per_day;
-        // There is a bug here. The total price is shown as 0.
+        // There was a bug here. The total price is shown as 0.
         // Set the total price for immediate update
         updateTotalPrice();
     }
@@ -532,12 +532,23 @@ function submitReservation() {
             // Clear form data
             clearFormData();
         } else {
-            // Show error message
-            showNotification(data.message, 'error');
-            // Re-enable submit button
-            if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.classList.remove('disabled');
+            // Check if the error is due to car unavailability
+            if (data.message && (
+                data.message.includes('not available') || 
+                data.message.includes('It is not available now') ||
+                data.message.includes('不可用') ||
+                data.message.includes('已被租用')
+            )) {
+                // Show car unavailable dialog
+                showCarUnavailableDialog();
+            } else {
+                // Show general error message
+                showNotification(data.message, 'error');
+                // Re-enable submit button
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('disabled');
+                }
             }
         }
     })
@@ -705,6 +716,84 @@ function showNotification(message, type = 'info') {
         notification.style.display = 'none';
         notification.remove();
     }, 3000);
+}
+
+/**
+ * Show car unavailable dialog when another user has already booked the car
+ */
+function showCarUnavailableDialog() {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'car-unavailable-overlay';
+    
+    // Create dialog
+    const dialog = document.createElement('div');
+    dialog.className = 'car-unavailable-dialog';
+    
+    dialog.innerHTML = `
+        <div class="dialog-header">
+            <div class="dialog-icon">⚠️</div>
+            <h3 class="dialog-title">Car Not Available</h3>
+        </div>
+        <div class="dialog-content">
+            <p class="dialog-message">Sorry, this car is no longer available for rent.</p>
+            <p class="dialog-submessage">Another customer may have just booked this car. Please select another vehicle.</p>
+        </div>
+        <div class="dialog-actions">
+            <button class="dialog-btn dialog-btn-primary" onclick="returnToCarSelection()">
+                Select Another Car
+            </button>
+            <button class="dialog-btn dialog-btn-secondary" onclick="closeCarUnavailableDialog()">
+                Stay on Page
+            </button>
+        </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    // Show with animation
+    setTimeout(() => {
+        overlay.classList.add('show');
+    }, 10);
+    
+    // Store reference for closing
+    window.currentUnavailableDialog = overlay;
+}
+
+/**
+ * Close car unavailable dialog
+ */
+function closeCarUnavailableDialog() {
+    const overlay = window.currentUnavailableDialog;
+    if (overlay) {
+        overlay.classList.remove('show');
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+            window.currentUnavailableDialog = null;
+            
+            // Re-enable submit button
+            const submitButton = document.getElementById('submit-btn');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.classList.remove('disabled');
+            }
+        }, 300);
+    }
+}
+
+/**
+ * Return to car selection page
+ */
+function returnToCarSelection() {
+    // Clear form data and selected car
+    clearFormData();
+    sessionStorage.removeItem('selected_vin');
+    
+    // Redirect to homepage
+    window.location.href = 'index.php';
 }
 
 /**
