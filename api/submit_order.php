@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
         'status' => 'error',
-        'message' => 'plz use POST'
+        'message' => 'Please use POST method'
     ]);
     exit;
 }
@@ -38,18 +38,18 @@ if (!empty($missingFields)) {
     http_response_code(400);
     echo json_encode([
         'status' => 'error',
-        'message' => 'lost infor: ' . implode(', ', $missingFields)
+        'message' => 'Missing information: ' . implode(', ', $missingFields)
     ]);
     exit;
 }
 
-//Verify whether the vehicle corresponding to the VIN exists and is available
+//Verify
 $car = getCarByVin($postData['vin']);
 if (!$car) {
     http_response_code(404);
     echo json_encode([
         'status' => 'error',
-        'message' => 'cannotfind'
+        'message' => 'Cannot find car with this VIN'
     ]);
     exit;
 }
@@ -58,7 +58,7 @@ if (!$car['availability']) {
     http_response_code(400);
     echo json_encode([
         'status' => 'error',
-        'message' => 'cannotrent'
+        'message' => 'It is not available now'
     ]);
     exit;
 }
@@ -85,26 +85,36 @@ if (!$orderId) {
     http_response_code(500);
     echo json_encode([
         'status' => 'error',
-        'message' => 'cannotcreatorder'
+        'message' => 'Cannot create order'
     ]);
     exit;
 }
 
 $updatedCar = updateCarAvailability($postData['vin'], false);
 if (!$updatedCar) {
-    // If the update fails, theoretically, the order creation should be rolled back.
-    // However, according to the requirements of the assessment, I only return the error here
-    http_response_code(500);
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Failed to update the car status'
-    ]);
+    // Check if the car is still available (another user might have booked it)
+    $currentCar = getCarByVin($postData['vin']);
+    if ($currentCar && !$currentCar['availability']) {
+        // Car was booked by another user
+        http_response_code(400);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'It is not available now'
+        ]);
+    } else {
+        // Other error occurred
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Failed to update the car status'
+        ]);
+    }
     exit;
 }
 
 echo json_encode([
     'status' => 'success',
-    'message' => 'waitingforcomfimation',
+    'message' => 'Order submitted, waiting for confirmation',
     'data' => [
         'order_id' => $orderId,
         'total_price' => $totalPrice
