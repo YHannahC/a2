@@ -255,6 +255,13 @@ function setupFormValidation() {
         
         if (isValid) {
             submitReservation();
+        } else {
+            // Mark empty fields as error
+            inputs.forEach(input => {
+                if (input && input.value.trim() === '') {
+                    input.classList.add('error');
+                }
+            });
         }
     });
 }
