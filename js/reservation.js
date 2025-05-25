@@ -262,6 +262,19 @@ function setupFormValidation() {
                     input.classList.add('error');
                 }
             });
+            
+            // Show tooltip on submit button
+            const submitButton = document.getElementById('submit-btn');
+            if (submitButton) {
+                submitButton.title = 'Please complete the form.';
+                submitButton.style.cursor = 'not-allowed';
+                
+                // Remove tooltip after 3 seconds
+                setTimeout(() => {
+                    submitButton.title = '';
+                    submitButton.style.cursor = 'pointer';
+                }, 3000);
+            }
         }
     });
 }
